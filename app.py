@@ -13,7 +13,9 @@ from data import fetch_data
 klines = fetch_data()
 df = pd.DataFrame(klines[1:], columns=klines[0])
 
+
 dash = dash.Dash(__name__)
+server = dash.server
 
 dash.layout = html.Div([
     dcc.Checklist(
