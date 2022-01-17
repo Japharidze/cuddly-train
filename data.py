@@ -1,6 +1,5 @@
-from asyncore import read
 import requests
-import json 
+from threading import Thread
 
 from psycopg2 import connect
 from pandas import read_sql, DataFrame
@@ -26,7 +25,7 @@ def fetch_data_test(**kwargs):
 
 def fetch_binance_data(data: DataFrame):
     res = []
-    for _, row in data.iterrows():
+    def fetch(row):
         params = dict(row)
         params['interval'] = '1m'
         response = requests.get(rest, params=params)
@@ -34,8 +33,17 @@ def fetch_binance_data(data: DataFrame):
         klines = response.json().get('klines')
         if klines:
             res.append((row, DataFrame(klines[1:], columns=klines[0])))
+
+    threads = []
+    for _, row in data.iterrows():
+        t = Thread(target=fetch, args=[row], daemon=True)
+        threads.append(t)
+        t.start()
         if _ > 10:
             break
+
+    for t in threads:
+        t.join()
 
     return res
 
@@ -45,16 +53,15 @@ def query_trade_data(**kwargs):
     with open('media/sql/get_trades.sql') as f:
         query = f.read()
 
+    print(kwargs)
     dt = read_sql(query, conn)
     for k, v in kwargs.items():
-        if k not in dt.columns:
-            continue
         if k == 'profit':
             dt = dt[dt['profit'].between(v[0], v[1])]
         elif k == 'symbols':
             dt = dt[dt['symbol'].isin(v)]
         elif k == 'period':
-            dt = dt[dt['createdAt'].between(v[0], v[1])]
+            dt = dt[(dt['start_time']/1000).between(v[0], v[1])]
 
     return dt
 
