@@ -7,6 +7,7 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import plotly.express as px
 
 from data import fetch_binance_data, query_trade_data, query_coins
 
@@ -121,12 +122,17 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
             ], layout_title_text='{} {:0.2f}%'.format(symbol, profit))
         fig.update_layout(xaxis_rangeslider_visible=False)
 
-        new_child = html.Div(
-            dbc.Row(dbc.Col(
-                [dcc.Graph(className='graph', id=f'graph{i}', figure=fig)],
+        bar_fig = px.bar(kline, x='DateTime', y='Volume')
+
+        new_child = html.Div([
+            dbc.Row(dbc.Col([
+                dcc.Graph(className='graph', id=f'graph{i}', figure=fig)],
                 width={'size':8, 'offset':2}
-            ))
-        )
+            )),
+            dbc.Row(dbc.Col([
+                dcc.Graph(className='graph_bar', figure=bar_fig)
+            ], width={'size':8, 'offset':2}))
+        ])
 
         container.append(new_child)
     return container
