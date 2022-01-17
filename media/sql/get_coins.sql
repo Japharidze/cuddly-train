@@ -1,0 +1,1 @@
+select binance_name from coins
