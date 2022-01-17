@@ -7,7 +7,6 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import plotly.express as px
 
 from data import fetch_binance_data, query_trade_data, query_coins
 
