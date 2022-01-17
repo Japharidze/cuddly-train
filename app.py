@@ -28,7 +28,7 @@ dash.layout = html.Div([
     html.Br(),
     dbc.Row([
         dbc.Col(
-            [dcc.Dropdown(id='name_dpdn', multi=True, value='all_values',
+            [dcc.Dropdown(id='name_dpdn', multi=True, # value='all_values',
                 options=[{'label':x, 'value':x} for x in coins] +\
                         [{'label':'All', 'value':'all_values'}]
                 )], width={'size': 8, 'offset': 2})
@@ -89,8 +89,10 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
 
     params = {'profit': (min_percent, max_percent),
               'period': (start_time, end_time)}
-    if symbols != 'all_values':
-        params['symbols'] = symbols
+
+    if symbols:
+        if 'all_values' not in symbols:
+            params['symbols'] = symbols
 
     trades = query_trade_data(**params)
     klines = fetch_binance_data(trades)

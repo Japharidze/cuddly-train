@@ -53,6 +53,7 @@ def query_trade_data(**kwargs):
     with open('media/sql/get_trades.sql') as f:
         query = f.read()
 
+    print(kwargs)
     dt = read_sql(query, conn)
     for k, v in kwargs.items():
         if k == 'profit':
