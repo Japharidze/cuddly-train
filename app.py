@@ -109,20 +109,52 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
                     high=kline['High'],
                     low=kline['Low'],
                     close=kline['Close'],
-                    name='Candle'),
+                    name='Candle',
+                    increasing_line_color='#26a69a',
+                    decreasing_line_color='#ef5350'),
                 go.Scatter(x=kline['DateTime'], y=kline['EMA5'],
-                           line={'color':'green', 'width': 1},
+                           line={'color':'DarkOrange', 'width': 1},
                            name='EMA5'),
                 go.Scatter(x=kline['DateTime'], y=kline['EMA9'],
-                           line={'color':'blue', 'width': 1},
+                           line={'color':'LightSeaGreen', 'width': 1},
                            name='EMA9'),
                 go.Scatter(x=kline['DateTime'], y=kline['EMA12'],
-                           line={'color':'yellow', 'width': 1},
-                           name='EMA12')
+                           line={'color':'RoyalBlue', 'width': 1},
+                           name='EMA12'),
             ], layout_title_text='{} {:0.2f}%'.format(symbol, profit))
-        fig.update_layout(xaxis_rangeslider_visible=False)
+        fig.update_layout(
+            xaxis_rangeslider_visible=False,
+            height=600,
+            paper_bgcolor='#161a25',
+            plot_bgcolor='#161a25',
+            font_color='Silver',
+            shapes=[dict(
+                type='line',
+                x0=datetime.utcfromtimestamp(row['start_time']/1000),
+                x1=datetime.utcfromtimestamp(row['start_time']/1000),
+                y0=0,
+                y1=1,
+                yref='paper',
+                xref='x',
+                line=dict(color='#26a69a',
+                          dash='dashdot')
+            ), dict(
+                type='line',
+                x0=datetime.utcfromtimestamp(row['end_time']/1000),
+                x1=datetime.utcfromtimestamp(row['end_time']/1000),
+                y0=0,
+                y1=1,
+                yref='paper',
+                xref='x',
+                line=dict(color='#ef5350',
+                          dash='dashdot')
+            )]
+        )
+        fig.update_xaxes(showline=True, gridcolor='#242732')
+        fig.update_yaxes(showline=True, gridcolor='#242732')
 
         bar_fig = px.bar(kline, x='DateTime', y='Volume')
+        bar_fig.update_layout(paper_bgcolor='#161a25', font_color='Silver')
 
         new_child = html.Div([
             dbc.Row(dbc.Col([
