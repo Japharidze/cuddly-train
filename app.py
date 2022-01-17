@@ -1,10 +1,7 @@
 from datetime import date, timedelta
 from datetime import datetime
-from turtle import bgcolor
 
 import dash
-import pandas as pd
-from numpy import Inf
 from dash import html
 from dash import dcc
 from dash.dependencies import Input, Output, State
