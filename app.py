@@ -101,9 +101,15 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
                     low=kline['Low'],
                     close=kline['Close'],
                     name='Candle'),
-                go.Scatter(x=kline['DateTime'], y=kline['EMA10'],
+                go.Scatter(x=kline['DateTime'], y=kline['EMA5'],
                            line={'color':'green', 'width': 1},
-                           name='EMA10')
+                           name='EMA5'),
+                go.Scatter(x=kline['DateTime'], y=kline['EMA9'],
+                           line={'color':'blue', 'width': 1},
+                           name='EMA9'),
+                go.Scatter(x=kline['DateTime'], y=kline['EMA12'],
+                           line={'color':'yellow', 'width': 1},
+                           name='EMA12')
             ], layout_title_text='{} {:0.2f}%'.format(symbol, profit))
         fig.update_layout(xaxis_rangeslider_visible=False)
 
