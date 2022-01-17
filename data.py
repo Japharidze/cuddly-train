@@ -55,14 +55,12 @@ def query_trade_data(**kwargs):
 
     dt = read_sql(query, conn)
     for k, v in kwargs.items():
-        if k not in dt.columns:
-            continue
         if k == 'profit':
             dt = dt[dt['profit'].between(v[0], v[1])]
         elif k == 'symbols':
             dt = dt[dt['symbol'].isin(v)]
         elif k == 'period':
-            dt = dt[dt['createdAt'].between(v[0], v[1])]
+            dt = dt[(dt['start_time']/1000).between(v[0], v[1])]
 
     return dt
 

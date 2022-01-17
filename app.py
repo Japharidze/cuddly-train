@@ -28,9 +28,10 @@ dash.layout = html.Div([
     html.Br(),
     dbc.Row([
         dbc.Col(
-            [dcc.Dropdown(id='name_dpdn', multi=True, value=['SHIBUSDT'],
-                options=[{'label':x, 'value':x} for x in coins
-                ])], width={'size': 8, 'offset': 2})
+            [dcc.Dropdown(id='name_dpdn', multi=True, value='all_values',
+                options=[{'label':x, 'value':x} for x in coins] +\
+                        [{'label':'All', 'value':'all_values'}]
+                )], width={'size': 8, 'offset': 2})
         ]),
     html.Br(),
     dbc.Row([
@@ -81,14 +82,19 @@ dash.layout = html.Div([
         Input(component_id="submit", component_property="n_clicks")
     ])
 def update_container(container, symbols, start_date, end_date, min_percent, max_percent, n_clicks):
+    container = []
 
     start_time = datetime.strptime(start_date or '2021-12-14', '%Y-%m-%d').timestamp()
     end_time = datetime.strptime(end_date or '2021-12-14', '%Y-%m-%d').timestamp()
 
-    trades = query_trade_data(profit=(min_percent, max_percent),
-                              period=(start_time, end_time),
-                              symbols=symbols)
+    params = {'profit': (min_percent, max_percent),
+              'period': (start_time, end_time)}
+    if symbols != 'all_values':
+        params['symbols'] = symbols
+
+    trades = query_trade_data(**params)
     klines = fetch_binance_data(trades)
+    print(f'Printing number of charts: {len(klines)}')
 
     for i, (row, kline) in enumerate(klines):
         symbol = row['symbol']
@@ -116,7 +122,6 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
 
         container.append(new_child)
     return container
-
 
 
 # start Flask server
