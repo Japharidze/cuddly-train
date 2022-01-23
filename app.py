@@ -2,14 +2,17 @@ from datetime import date, timedelta
 from datetime import datetime
 
 import dash
+from numpy import array
 from dash import html
 from dash import dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
+from plotly.subplots import make_subplots
 
 from data import fetch_binance_data, query_trade_data, query_coins
+from config import colors
 
 
 trades = query_trade_data()
@@ -102,26 +105,49 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
     for i, (row, kline) in enumerate(klines):
         symbol = row['symbol']
         profit = row['profit']
-        fig = go.Figure([
-                go.Candlestick(
-                    x=kline['DateTime'],
-                    open=kline['Open'],
-                    high=kline['High'],
-                    low=kline['Low'],
-                    close=kline['Close'],
-                    name='Candle',
-                    increasing_line_color='#26a69a',
-                    decreasing_line_color='#ef5350'),
-                go.Scatter(x=kline['DateTime'], y=kline['EMA5'],
-                           line={'color':'DarkOrange', 'width': 1},
-                           name='EMA5'),
-                go.Scatter(x=kline['DateTime'], y=kline['EMA9'],
-                           line={'color':'LightSeaGreen', 'width': 1},
-                           name='EMA9'),
-                go.Scatter(x=kline['DateTime'], y=kline['EMA12'],
-                           line={'color':'RoyalBlue', 'width': 1},
-                           name='EMA12'),
-            ], layout_title_text='{} {:0.2f}%'.format(symbol, profit))
+
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
+        # add Candlestick
+        fig.add_trace(
+            go.Candlestick(
+                x=kline['DateTime'],
+                open=kline['Open'],
+                high=kline['High'],
+                low=kline['Low'],
+                close=kline['Close'],
+                name='Candle',
+                increasing={'fillcolor': colors.CANDLE_GREEN, 'line': {'color': colors.CANDLE_GREEN}},
+                decreasing={'fillcolor': colors.CANDLE_RED, 'line': {'color': colors.CANDLE_RED}}),
+            secondary_y=True)
+        # add EMAS
+        fig.add_trace(
+            go.Scatter(x=kline['DateTime'], y=kline['EMA5'],
+                       line={'color': 'DarkOrange', 'width': 1},
+                       name='EMA5'),
+            secondary_y=True)
+        fig.add_trace(
+            go.Scatter(x=kline['DateTime'], y=kline['EMA9'],
+                       line={'color': 'LightSeaGreen', 'width': 1},
+                       name='EMA9'),
+            secondary_y=True)
+        fig.add_trace(
+            go.Scatter(x=kline['DateTime'], y=kline['EMA12'],
+                       line={'color': 'RoyalBlue', 'width': 1},
+                       name='EMA12'),
+            secondary_y=True)
+        # add Volume
+        color = array([colors.CANDLE_RED] * kline.shape[0], dtype='object')
+        mask = kline['Open'] < kline['Close']
+        color[mask] = colors.CANDLE_GREEN
+        fig.add_trace(
+            go.Bar(
+                x=kline['DateTime'],
+                y=kline['Volume'],
+                name='Volume',
+                opacity=0.5,
+                marker={'color': color}),
+            secondary_y=False)
+
         fig.update_layout(
             xaxis_rangeslider_visible=False,
             height=600,
@@ -153,17 +179,11 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
         fig.update_xaxes(showline=True, gridcolor='#242732')
         fig.update_yaxes(showline=True, gridcolor='#242732')
 
-        bar_fig = px.bar(kline, x='DateTime', y='Volume')
-        bar_fig.update_layout(paper_bgcolor='#161a25', font_color='Silver')
-
         new_child = html.Div([
             dbc.Row(dbc.Col([
                 dcc.Graph(className='graph', id=f'graph{i}', figure=fig)],
                 width={'size':8, 'offset':2}
-            )),
-            dbc.Row(dbc.Col([
-                dcc.Graph(className='graph_bar', figure=bar_fig)
-            ], width={'size':8, 'offset':2}))
+            ))
         ])
 
         container.append(new_child)
