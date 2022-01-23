@@ -3,6 +3,7 @@ from datetime import datetime
 
 import dash
 from numpy import array
+from pandas import melt
 from dash import html
 from dash import dcc
 from dash.dependencies import Input, Output, State
@@ -113,7 +114,7 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
             params['symbols'] = symbols
 
     trades = query_trade_data(**params)
-    klines = fetch_binance_data(trades, interval=interval or '1m')
+    klines = fetch_binance_data(trades, interval=interval or '3m')
     print(f'Printing number of charts: {len(klines)}')
 
     for i, (row, kline) in enumerate(klines):
@@ -158,6 +159,29 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
                 marker={'color': color}),
             secondary_y=False)
 
+        # add trade marks
+        coin_trades = trades[trades['symbol'] == symbol]
+        fig.add_trace(
+            go.Scatter(x=(coin_trades['start_time']/1000).map(datetime.utcfromtimestamp),
+                       y=coin_trades['buy_price'],
+                       name='Buy points',
+                       mode='markers',
+                       marker={'color': colors.CANDLE_GREEN, 'size': 15, 'symbol': 'triangle-up',
+                               'line': {'color': 'black', 'width': 1}}),
+            secondary_y=True
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=(coin_trades['end_time']/1000).map(datetime.utcfromtimestamp),
+                y=coin_trades['sell_price'],
+                name='Sell points',
+                mode='markers',
+                marker={'color': colors.CANDLE_RED, 'size': 15, 'symbol': 'triangle-down',
+                        'line': {'color': 'black', 'width': 1}}
+            ),
+            secondary_y=True
+        )
+
         fig.update_layout(
             title_text='{} {:0.2f}%'.format(symbol, profit),
             xaxis_rangeslider_visible=False,
@@ -165,29 +189,10 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
             paper_bgcolor='#161a25',
             plot_bgcolor='#161a25',
             font_color='Silver',
-            shapes=[dict(
-                type='line',
-                x0=datetime.utcfromtimestamp(row['start_time']/1000),
-                x1=datetime.utcfromtimestamp(row['start_time']/1000),
-                y0=0,
-                y1=1,
-                yref='paper',
-                xref='x',
-                line=dict(color='#26a69a',
-                          dash='dashdot')
-            ), dict(
-                type='line',
-                x0=datetime.utcfromtimestamp(row['end_time']/1000),
-                x1=datetime.utcfromtimestamp(row['end_time']/1000),
-                y0=0,
-                y1=1,
-                yref='paper',
-                xref='x',
-                line=dict(color='#ef5350',
-                          dash='dashdot')
-            )]
+            yaxis={'title': 'Volume'},
+            yaxis2={'title': 'Price'}
         )
-        fig.update_xaxes(showline=True, gridcolor='#242732')
+        fig.update_xaxes(showline=True, gridcolor='#242732', title='Time')
         fig.update_yaxes(showline=True, gridcolor='#242732')
 
         new_child = html.Div([

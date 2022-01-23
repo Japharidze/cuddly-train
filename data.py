@@ -24,6 +24,12 @@ def fetch_data_test(**kwargs):
     return response.json().get('klines')
 
 def fetch_binance_data(data: DataFrame, interval='1m'):
+    data = data.groupby('symbol').agg({
+        'start_time': 'min',
+        'end_time': 'max',
+        'profit': 'sum'
+    }).reset_index()
+
     res = []
     def fetch(row):
         params = dict(row)
