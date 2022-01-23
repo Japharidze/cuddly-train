@@ -155,6 +155,7 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
             secondary_y=False)
 
         fig.update_layout(
+            title_text='{} {:0.2f}%'.format(symbol, profit),
             xaxis_rangeslider_visible=False,
             height=600,
             paper_bgcolor='#161a25',
