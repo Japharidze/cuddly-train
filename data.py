@@ -23,13 +23,13 @@ def fetch_data_test(**kwargs):
         response = requests.get(rest, params=g_event)
     return response.json().get('klines')
 
-def fetch_binance_data(data: DataFrame):
+def fetch_binance_data(data: DataFrame, interval='1m'):
     res = []
     def fetch(row):
         params = dict(row)
-        params['interval'] = '1m'
+        params['interval'] = interval
         response = requests.get(rest, params=params)
-        print(dict(row))
+        print(params)
         klines = response.json().get('klines')
         if klines:
             res.append((row, DataFrame(klines[1:], columns=klines[0])))

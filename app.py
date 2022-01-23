@@ -12,6 +12,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 
 from data import fetch_binance_data, query_trade_data, query_coins
+from utils import candle_interval_generator
 from config import colors
 
 
@@ -31,8 +32,9 @@ dash.layout = html.Div([
     ]),
     html.Br(),
     dbc.Row([
-        dbc.Col(
-            [dcc.Dropdown(id='name_dpdn', multi=True, # value='all_values',
+        dbc.Col([
+            html.Label('Coins'),
+            dcc.Dropdown(id='name_dpdn', multi=True, # value='all_values',
                 options=[{'label':x, 'value':x} for x in coins] +\
                         [{'label':'All', 'value':'all_values'}]
                 )], width={'size': 8, 'offset': 2})
@@ -40,6 +42,7 @@ dash.layout = html.Div([
     html.Br(),
     dbc.Row([
         dbc.Col([
+            html.Label('Date Interval'),
             dcc.DatePickerRange(
                 id='date-range',
                 min_date_allowed=date.today() - timedelta(30),
@@ -49,6 +52,11 @@ dash.layout = html.Div([
             )
         ], width={'size': 2, 'offset': 2}),
         dbc.Col([
+            html.Label('Candle Interval'),
+            dcc.Dropdown(id='interval_dpdn')],
+            width=2),
+        dbc.Col([
+            html.Label('Profit range'),
             dcc.Input(
                 id='min_percent',
                 type='number',
@@ -57,6 +65,7 @@ dash.layout = html.Div([
             )
         ], width=1),
         dbc.Col([
+            html.Label('Min/Max'),
             dcc.Input(
                 id='max_percent',
                 type='number',
@@ -81,11 +90,12 @@ dash.layout = html.Div([
         State(component_id="name_dpdn", component_property="value"),
         State(component_id="date-range", component_property="start_date"),
         State(component_id="date-range", component_property="end_date"),
+        State(component_id='interval_dpdn', component_property='value'),
         State(component_id="min_percent", component_property="value"),
         State(component_id="max_percent", component_property="value"),
         Input(component_id="submit", component_property="n_clicks")
     ])
-def update_container(container, symbols, start_date, end_date, min_percent, max_percent, n_clicks):
+def update_container(container, symbols, start_date, end_date, interval, min_percent, max_percent, n_clicks):
     container = []
 
     start_time = datetime.strptime(start_date or '2021-12-14', '%Y-%m-%d').timestamp()
@@ -99,7 +109,7 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
             params['symbols'] = symbols
 
     trades = query_trade_data(**params)
-    klines = fetch_binance_data(trades)
+    klines = fetch_binance_data(trades, interval=interval or '1m')
     print(f'Printing number of charts: {len(klines)}')
 
     for i, (row, kline) in enumerate(klines):
@@ -119,22 +129,18 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
                 increasing={'fillcolor': colors.CANDLE_GREEN, 'line': {'color': colors.CANDLE_GREEN}},
                 decreasing={'fillcolor': colors.CANDLE_RED, 'line': {'color': colors.CANDLE_RED}}),
             secondary_y=True)
+
         # add EMAS
-        fig.add_trace(
-            go.Scatter(x=kline['DateTime'], y=kline['EMA5'],
-                       line={'color': 'DarkOrange', 'width': 1},
-                       name='EMA5'),
-            secondary_y=True)
-        fig.add_trace(
-            go.Scatter(x=kline['DateTime'], y=kline['EMA9'],
-                       line={'color': 'LightSeaGreen', 'width': 1},
-                       name='EMA9'),
-            secondary_y=True)
-        fig.add_trace(
-            go.Scatter(x=kline['DateTime'], y=kline['EMA12'],
-                       line={'color': 'RoyalBlue', 'width': 1},
-                       name='EMA12'),
-            secondary_y=True)
+        emas = ['EMA5', 'EMA9', 'EMA12']
+        for ema in emas:
+            if ema in kline.columns:
+                fig.add_trace(
+                    go.Scatter(x=kline['DateTime'], y=kline[ema],
+                               name=ema,
+                               line={'color': getattr(colors, ema), 'width': 1}),
+                    secondary_y=True
+                )
+
         # add Volume
         color = array([colors.CANDLE_RED] * kline.shape[0], dtype='object')
         mask = kline['Open'] < kline['Close']
@@ -188,6 +194,17 @@ def update_container(container, symbols, start_date, end_date, min_percent, max_
 
         container.append(new_child)
     return container
+
+# callback for dynamic Dropdown
+@dash.callback(
+    Output('interval_dpdn', 'options'),
+    [Input('date-range', 'start_date'),
+     Input('date-range', 'end_date')]
+)
+def update_candle_interval_dpdn(start_date, end_date):
+    start_time = datetime.strptime(start_date or '2021-12-14', '%Y-%m-%d')
+    end_time = datetime.strptime(end_date or '2021-12-14', '%Y-%m-%d')
+    return candle_interval_generator(start_time, end_time)
 
 
 # start Flask server
