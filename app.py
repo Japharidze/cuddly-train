@@ -53,7 +53,9 @@ dash.layout = html.Div([
         ], width={'size': 2, 'offset': 2}),
         dbc.Col([
             html.Label('Candle Interval'),
-            dcc.Dropdown(id='interval_dpdn')],
+            dcc.Dropdown(id='interval_dpdn',
+                         # value='3m',
+                         clearable=False)],
             width=2),
         dbc.Col([
             html.Label('Profit range'),
@@ -96,6 +98,8 @@ dash.layout = html.Div([
         Input(component_id="submit", component_property="n_clicks")
     ])
 def update_container(container, symbols, start_date, end_date, interval, min_percent, max_percent, n_clicks):
+    if not n_clicks:
+        return container
     container = []
 
     start_time = datetime.strptime(start_date or '2021-12-14', '%Y-%m-%d').timestamp()
