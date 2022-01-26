@@ -1,4 +1,5 @@
 import requests
+from pathlib import Path
 from threading import Thread
 
 from psycopg2 import connect
@@ -77,4 +78,15 @@ def query_coins():
         query = f.read()
 
     dt = read_sql(query, conn)
-    return dt['binance_name']
+    return dt
+
+def query_data(sql_file: str):
+    if not sql_file:
+        return
+    path = Path('media/sql', sql_file + '.sql')
+
+    with open(path) as f:
+        query = f.read()
+
+    dt = read_sql(query, conn)
+    return dt

@@ -1,1 +1,1 @@
-select binance_name from coins
+select binance_name, kucoin_name, allow_trade from coins

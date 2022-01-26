@@ -15,10 +15,11 @@ from plotly.subplots import make_subplots
 from data import fetch_binance_data, query_trade_data, query_coins
 from utils import candle_interval_generator
 from config import colors
+from body_components import table
 
 
 trades = query_trade_data()
-coins = query_coins()
+coins = query_coins()['binance_name']
 
 dash = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO],
                 meta_tags=[{'name': 'viewport',
@@ -26,6 +27,25 @@ dash = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO],
 server = dash.server
 
 dash.layout = html.Div([
+    dbc.Row([
+        dbc.Col([
+            html.H4('DEFYTHEODDS - Dashboard - V1')
+        ], width={'size': 6, 'offset': 2},
+           className='header'),
+        dbc.Col([
+            html.Label(datetime.now().strftime('%m/%d/%Y $ %H:%M:%S'))
+        ], width={'size': 2},
+           className='header')
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.H2('Trading on'),
+            table
+        ], width={'size': 4, 'offset': 2}),
+        dbc.Col([
+            html.H2('Live Buy/Sell'),
+        ], width={'size': 4})
+    ]),
     dbc.Row([
         dbc.Col([
             html.H1('Bot performance', className='text-center')
@@ -167,7 +187,7 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
                        name='Buy points',
                        mode='markers',
                        marker={'color': colors.CANDLE_GREEN, 'size': 15, 'symbol': 'triangle-up',
-                               'line': {'color': 'black', 'width': 1}}),
+                               'line': {'color': 'white', 'width': 1}}),
             secondary_y=True
         )
         fig.add_trace(
@@ -177,7 +197,7 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
                 name='Sell points',
                 mode='markers',
                 marker={'color': colors.CANDLE_RED, 'size': 15, 'symbol': 'triangle-down',
-                        'line': {'color': 'black', 'width': 1}}
+                        'line': {'color': 'white', 'width': 1}}
             ),
             secondary_y=True
         )
