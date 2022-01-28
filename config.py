@@ -2,7 +2,7 @@ import os
 
 class DBConfig:
     URL = os.environ.get('DATABASE_URL')
-    URL = 'postgresql://postgres:admin@localhost:5432/kucoin'
+    # URL = 'postgresql://postgres:admin@localhost:5432/kucoin'
 
 class Colors:
     CANDLE_RED = '#ef5350'

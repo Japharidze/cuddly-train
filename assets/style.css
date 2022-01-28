@@ -28,3 +28,32 @@ H2 {
     background-color: darkslateblue;
     color: white;
 }
+
+#pool_data > div {
+    height: 85px;
+    padding: 1px;
+}
+
+#pool_data > div > label {
+    text-align: left;
+    color: black;
+    font-weight: bold;
+    font-size: x-large;
+}
+
+#pool_data > div > .pool_size{
+    text-align: center;
+    font-weight: normal;
+}
+
+#pool_up {
+    background-color: lightseagreen;
+}
+
+#pool_down {
+    background-color: darkorange;
+}
+
+#pool_pool {
+    background-color: royalblue;
+}

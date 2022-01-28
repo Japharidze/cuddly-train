@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from data import fetch_binance_data, query_trade_data, query_coins
 from utils import candle_interval_generator
 from config import colors
-from body_components import table, update_live_trades_table
+from body_components import table, update_live_trades_table, update_pool_data
 
 
 trades = query_trade_data()
@@ -37,6 +37,21 @@ dash.layout = html.Div([
         ], width={'size': 2},
            className='header')
     ]),
+    dbc.Row([
+        dbc.Col([
+            html.H2('Current Pool'),
+            html.Label('Interval'),
+            dcc.Dropdown(id='pool_dpdn',
+                         value='today',
+                         options=[{'label': 'Today', 'value': 'today'},
+                                  {'label': 'This Week', 'value': 'week'},
+                                  {'label': 'This Month', 'value': 'month'}])
+        ], width={'size': 4, 'offset': 2}),
+        dbc.Col(id='pool_data',
+                children=update_pool_data(),
+                width={'size': 3, 'offset': 1})
+    ]),
+    html.Br(),
     dbc.Row([
         dbc.Col([
             html.H2('Trading on'),
@@ -250,6 +265,14 @@ def update_candle_interval_dpdn(start_date, end_date):
 )
 def update_live_table(n_intervals):
     return update_live_trades_table()
+
+# callback for pool data
+@dash.callback(
+    Output('pool_data', 'children'),
+    [Input('pool_dpdn', 'value')]
+)
+def update_pool_div(interval):
+    return update_pool_data(interval)
 
 # start Flask server
 if __name__ == '__main__':

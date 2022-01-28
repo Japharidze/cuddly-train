@@ -80,13 +80,17 @@ def query_coins():
     dt = read_sql(query, conn)
     return dt
 
-def query_data(sql_file: str):
+def query_data(sql_file: str, **kwargs):
     if not sql_file:
         return
     path = Path('media/sql', sql_file + '.sql')
 
     with open(path) as f:
         query = f.read()
+
+    if kwargs:
+        for k, v in kwargs.items():
+            query = query.replace(f'{{{k}}}', f'{v}')
 
     dt = read_sql(query, conn)
     return dt
