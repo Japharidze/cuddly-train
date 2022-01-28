@@ -123,8 +123,7 @@ dash.layout = html.Div([
         ], width={'size': 1, 'offset': 1})
     ], align='center'),
     html.Br(),
-    html.Div(id='container', children=[])
-    # ,html.Div(id='debug')
+    dcc.Loading(id='container', children=[])
 ])
 
 

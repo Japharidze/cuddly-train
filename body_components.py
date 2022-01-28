@@ -99,7 +99,7 @@ def update_pool_data(interval='today'):
     data = query_data('get_pool_data', timestamp=interval)
     pool_data['up'] = data[data['sign'] == 1]['amt'].sum()
     pool_data['down'] = data[data['sign'] == -1]['amt'].sum()
-    pool_data['pool'] = data['amt'].sum()
+    pool_data['pool'] = (data['amt'] * data['sign']).sum()
 
     # generate children result
     for pool in pools:
