@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from data import fetch_binance_data, query_trade_data, query_coins
 from utils import candle_interval_generator
 from config import colors
-from body_components import table
+from body_components import table, update_live_trades_table
 
 
 trades = query_trade_data()
@@ -43,7 +43,14 @@ dash.layout = html.Div([
             table
         ], width={'size': 4, 'offset': 2}),
         dbc.Col([
-            html.H2('Live Buy/Sell'),
+            html.H2('Live Trades'),
+            html.Div(id='live_table',
+                     children=update_live_trades_table()),
+            dcc.Interval(
+                id='live_trading_interval',
+                interval=1000,
+                n_intervals=0
+            )
         ], width={'size': 4})
     ]),
     dbc.Row([
@@ -236,6 +243,13 @@ def update_candle_interval_dpdn(start_date, end_date):
     end_time = datetime.strptime(end_date or '2021-12-14', '%Y-%m-%d')
     return candle_interval_generator(start_time, end_time)
 
+# callback for live trading table
+@dash.callback(
+    Output('live_table', 'children'),
+    [Input('live_trading_interval', 'n_intervals')]
+)
+def update_live_table(n_intervals):
+    return update_live_trades_table()
 
 # start Flask server
 if __name__ == '__main__':
