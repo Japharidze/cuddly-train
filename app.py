@@ -123,14 +123,14 @@ dash.layout = html.Div([
         ], width={'size': 1, 'offset': 1})
     ], align='center'),
     html.Br(),
-    dcc.Loading(id='container', children=[])
-])
+    dcc.Loading(id='chart_container', children=[])
+], className='container')
 
 
 @dash.callback(
-    Output(component_id="container", component_property="children"),
+    Output(component_id="chart_container", component_property="children"),
     [
-        State(component_id='container', component_property='children'),
+        State(component_id='chart_container', component_property='children'),
         State(component_id="name_dpdn", component_property="value"),
         State(component_id="date-range", component_property="start_date"),
         State(component_id="date-range", component_property="end_date"),
@@ -239,7 +239,7 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
         new_child = html.Div([
             dbc.Row(dbc.Col([
                 dcc.Graph(className='graph', id=f'graph{i}', figure=fig)],
-                width={'size':8, 'offset':2}
+                width={'offset':1}
             ))
         ])
 
