@@ -10,7 +10,11 @@ label {
     color: silver;
 }
 
-H2 {
+.row {
+    margin-bottom: 1%;
+}
+
+H2, H1 {
     color: white
 }
 
@@ -56,4 +60,26 @@ H2 {
 
 #pool_pool {
     background-color: royalblue;
+}
+
+
+.tab {
+    color: silver;
+    background-color: #161a25 !important;
+    font-family: "system-ui";
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-right: 0px !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+.tab--selected {
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+    color: #e3e3e3 !important;
+    background-color: #1c212e !important;
+    border-color: silver !important;
+    padding-top: 1% !important;
 }

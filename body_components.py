@@ -81,6 +81,24 @@ def generate_live_trades_table():
 
     return live_table
 
+def generate_last_trades_table():
+    data = query_data('last_trades')
+    data['Profit'] = data['Profit'].map(
+        lambda x: '{:.2f} %'.format(x)
+    )
+
+    res = DataTable(
+        columns = [{'name': i, 'id': i} for i in data.columns],
+        data = data.to_dict('records'),
+        fixed_rows = {'headers': True},
+        style_table = table.style_table,
+        style_header=table.style_header,
+        style_cell=table.style_cell,
+        style_data_conditional=table.style_data_conditional
+    )
+
+    return res
+
 
 def generate_pool_data(interval='today'):
     prefix = 'pool_'

@@ -15,7 +15,8 @@ from plotly.subplots import make_subplots
 from data import fetch_binance_data, query_trade_data, query_coins
 from utils import candle_interval_generator
 from config import colors
-from body_components import table, generate_live_trades_table, generate_pool_data, generate_trading_on_table
+from body_components import (generate_live_trades_table, generate_pool_data,
+                            generate_trading_on_table, generate_last_trades_table)
 
 
 trades = query_trade_data()
@@ -39,25 +40,33 @@ dash.layout = html.Div([
     ]),
     dbc.Row([
         dbc.Col([
-            html.H2('Current Pool'),
-            html.Label('Interval'),
-            dcc.Dropdown(id='pool_dpdn',
-                         value='today',
-                         options=[{'label': 'Today', 'value': 'today'},
-                                  {'label': 'This Week', 'value': 'week'},
-                                  {'label': 'This Month', 'value': 'month'}])
-        ], width={'size': 4, 'offset': 2}),
-        dbc.Col(id='pool_data',
-                children=generate_pool_data(),
-                width={'size': 3, 'offset': 1})
+            html.H1('Current Stats')
+        ], width={'size': 3, 'offset': 5})
     ]),
-    html.Br(),
+    dbc.Row([
+        dbc.Col([
+            dcc.Tabs(id='interval-tabs', value='today', children=[
+                dcc.Tab(label='Today', value='today'),
+                dcc.Tab(label='This Week', value='week'),
+                dcc.Tab(label='This Month', value='month')
+            ])
+        ], width={'size': 8, 'offset': 2})
+    ]),
     dbc.Row([
         dbc.Col([
             html.H2('Trading on'),
             html.Div(id='trading-on-div',
                      children=generate_trading_on_table())
         ], width={'size': 4, 'offset': 2}),
+        dbc.Col([
+            html.H2('Current Pool'),
+            html.Div(
+                id='pool_data',
+                children=generate_pool_data())
+        ], width={'size': 3, 'offset': 1})
+    ]),
+    html.Br(),
+    dbc.Row([
         dbc.Col([
             html.H2('Live Trades'),
             html.Div(id='live_table',
@@ -67,6 +76,11 @@ dash.layout = html.Div([
                 interval=1000,
                 n_intervals=0
             )
+        ], width={'size': 4, 'offset': 2}),
+        dbc.Col([
+            html.H2('Last 20 Trades'),
+            html.Div(id='last-20-trades',
+                     children=generate_last_trades_table()),
         ], width={'size': 4})
     ]),
     dbc.Row([
@@ -261,7 +275,7 @@ def update_candle_interval_dpdn(start_date, end_date):
 # callback for trading on table
 @dash.callback(
     Output('trading-on-div', 'children'),
-    [Input('pool_dpdn', 'value')]
+    [Input('interval-tabs', 'value')]
 )
 def update_trading_on_table(interval):
     return generate_trading_on_table(interval)
@@ -274,10 +288,18 @@ def update_trading_on_table(interval):
 def update_live_table(n_intervals):
     return generate_live_trades_table()
 
+# callback for last trades table
+@dash.callback(
+    Output('last-20-trades', 'children'),
+    [Input('live_trading_interval', 'n_intervals')]
+)
+def update_last_trades_table(_):
+    return generate_last_trades_table()
+
 # callback for pool data
 @dash.callback(
     Output('pool_data', 'children'),
-    [Input('pool_dpdn', 'value')]
+    [Input('interval-tabs', 'value')]
 )
 def update_pool_div(interval):
     return generate_pool_data(interval)
