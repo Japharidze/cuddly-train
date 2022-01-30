@@ -15,7 +15,7 @@ from plotly.subplots import make_subplots
 from data import fetch_binance_data, query_trade_data, query_coins
 from utils import candle_interval_generator
 from config import colors
-from body_components import table, update_live_trades_table, update_pool_data
+from body_components import table, generate_live_trades_table, generate_pool_data, generate_trading_on_table
 
 
 trades = query_trade_data()
@@ -48,19 +48,20 @@ dash.layout = html.Div([
                                   {'label': 'This Month', 'value': 'month'}])
         ], width={'size': 4, 'offset': 2}),
         dbc.Col(id='pool_data',
-                children=update_pool_data(),
+                children=generate_pool_data(),
                 width={'size': 3, 'offset': 1})
     ]),
     html.Br(),
     dbc.Row([
         dbc.Col([
             html.H2('Trading on'),
-            table
+            html.Div(id='trading-on-div',
+                     children=generate_trading_on_table())
         ], width={'size': 4, 'offset': 2}),
         dbc.Col([
             html.H2('Live Trades'),
             html.Div(id='live_table',
-                     children=update_live_trades_table()),
+                     children=generate_live_trades_table()),
             dcc.Interval(
                 id='live_trading_interval',
                 interval=1000,
@@ -257,13 +258,21 @@ def update_candle_interval_dpdn(start_date, end_date):
     end_time = datetime.strptime(end_date or '2021-12-14', '%Y-%m-%d')
     return candle_interval_generator(start_time, end_time)
 
+# callback for trading on table
+@dash.callback(
+    Output('trading-on-div', 'children'),
+    [Input('pool_dpdn', 'value')]
+)
+def update_trading_on_table(interval):
+    return generate_trading_on_table(interval)
+
 # callback for live trading table
 @dash.callback(
     Output('live_table', 'children'),
     [Input('live_trading_interval', 'n_intervals')]
 )
 def update_live_table(n_intervals):
-    return update_live_trades_table()
+    return generate_live_trades_table()
 
 # callback for pool data
 @dash.callback(
@@ -271,7 +280,7 @@ def update_live_table(n_intervals):
     [Input('pool_dpdn', 'value')]
 )
 def update_pool_div(interval):
-    return update_pool_data(interval)
+    return generate_pool_data(interval)
 
 # start Flask server
 if __name__ == '__main__':

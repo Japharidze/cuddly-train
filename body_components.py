@@ -5,60 +5,65 @@ from dash import html
 from dash.dash_table import DataTable
 
 from data import query_data
+from utils import get_db_timestamp
 from config import colors
 
 
-tab_data = query_data('trading_on')
-tab_data['sum_profit'] = tab_data['sum_profit'].map(
-    lambda x: '{:.2f} %'.format(x)
-)
-tab_data.columns = ['Coin name', 'Count', 'Profit']
+def generate_trading_on_table(interval='today'):
+    tmstmp = get_db_timestamp(interval)
+    tab_data = query_data('trading_on', timestamp=tmstmp)
+    tab_data['sum_profit'] = tab_data['sum_profit'].map(
+        lambda x: '{:.2f} %'.format(x)
+    )
+    tab_data.columns = ['Coin name', 'Count', 'Profit']
 
-table = DataTable(
-    columns=[{'name': i, 'id': i} for i in tab_data.columns],
-    data=tab_data.to_dict('records'),
-    fixed_rows={'headers': True},
-    style_table={'height': '300px', 'overflowY': 'auto'},
-    style_header={'fontWeight': 'bold'},
-    style_cell={'textAlign': 'left'},
-    style_cell_conditional=[
-        {'if': {'column_id': 'Count'},
-         'width': '180px'}
-    ],
-    # style_data={'backgroundColor': 'gray'},
-    style_data_conditional=[
-        {
-            'if': {'column_id': 'Profit'},
-            'color': colors.CANDLE_GREEN,
-        },
-        {
-            'if': {
-                'filter_query': '{Profit} contains "-"',
-                'column_id': 'Profit'
+    table = DataTable(
+        columns=[{'name': i, 'id': i} for i in tab_data.columns],
+        data=tab_data.to_dict('records'),
+        fixed_rows={'headers': True},
+        style_table={'height': '300px', 'overflowY': 'auto'},
+        style_header={'fontWeight': 'bold'},
+        style_cell={'textAlign': 'left'},
+        style_cell_conditional=[
+            {'if': {'column_id': 'Count'},
+            'width': '180px'}
+        ],
+        # style_data={'backgroundColor': 'gray'},
+        style_data_conditional=[
+            {
+                'if': {'column_id': 'Profit'},
+                'color': colors.CANDLE_GREEN,
             },
-            'color': colors.CANDLE_RED,
-        },
-        {
-            'if': {
-                'filter_query': '{Profit} = "nan %"',
-                'column_id': 'Profit'
+            {
+                'if': {
+                    'filter_query': '{Profit} contains "-"',
+                    'column_id': 'Profit'
+                },
+                'color': colors.CANDLE_RED,
             },
-            'color': 'black',
-        },
-        {
-            'if': {
-                'state': 'active'
+            {
+                'if': {
+                    'filter_query': '{Profit} = "nan %"',
+                    'column_id': 'Profit'
+                },
+                'color': 'black',
             },
-            'backgroundColor': 'silver',
-            'border': '1px solid black'
-        }
-    ]
-)
+            {
+                'if': {
+                    'state': 'active'
+                },
+                'backgroundColor': 'silver',
+                'border': '1px solid black'
+            }
+        ]
+    )
+
+    return table
 
 
+table = generate_trading_on_table() # This needs to be changed, moved only cuz it's parameters needed below
 
-
-def update_live_trades_table():
+def generate_live_trades_table():
     data = query_data('live_trades')
     data['createdAt'] = (data['createdAt']/1000).map(
         lambda x: datetime.utcfromtimestamp(x).strftime('%m/%d/%Y %H:%M:%S')
@@ -77,26 +82,17 @@ def update_live_trades_table():
     return live_table
 
 
-def update_pool_data(interval='today'):
+def generate_pool_data(interval='today'):
     prefix = 'pool_'
     pools = ['up', 'down', 'pool']
     pool_data = dict()
     children = []
 
     # define interval timestamp
-    if interval == 'today':
-        dt = datetime.combine(date.today(), datetime.min.time())
-    if interval == 'week':
-        dt = date.today()
-        dt = dt - timedelta(days=dt.weekday())
-        dt = datetime.combine(dt, datetime.min.time())
-    if interval == 'month':
-        dt = date.today().replace(day=1)
-        dt = datetime.combine(dt, datetime.min.time())
-    interval = dt.timestamp() * 1000
+    tmstmp = get_db_timestamp(interval)
 
     # fetch data from db
-    data = query_data('get_pool_data', timestamp=interval)
+    data = query_data('get_pool_data', timestamp=tmstmp)
     pool_data['up'] = data[data['sign'] == 1]['amt'].sum()
     pool_data['down'] = data[data['sign'] == -1]['amt'].sum()
     pool_data['pool'] = (data['amt'] * data['sign']).sum()
