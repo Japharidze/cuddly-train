@@ -1,8 +1,8 @@
 select
-    t.symbol,
-    t."createdAt",
-    t."dealSize",
-    t."dealFunds"::DECIMAL / t."dealSize"::DECIMAL as Price
+    t.symbol "Coin",
+    t."dealSize" "Deal Size",
+    t."dealFunds"::DECIMAL / t."dealSize"::DECIMAL as "Price",
+    t."createdAt" "Buy Time"
 from coins c
     join trades t 
         on c.bought_id = t.id

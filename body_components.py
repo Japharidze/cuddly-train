@@ -1,5 +1,5 @@
 import dash
-from datetime import datetime, date, timedelta
+from datetime import datetime
 
 from dash import html
 from dash.dash_table import DataTable
@@ -15,7 +15,7 @@ def generate_trading_on_table(interval='today'):
     tab_data['sum_profit'] = tab_data['sum_profit'].map(
         lambda x: '{:.2f} %'.format(x)
     )
-    tab_data.columns = ['Coin name', 'Count', 'Profit']
+    tab_data.columns = ['Coin', 'Count', 'Profit']
 
     table = DataTable(
         columns=[{'name': i, 'id': i} for i in tab_data.columns],
@@ -65,7 +65,7 @@ table = generate_trading_on_table() # This needs to be changed, moved only cuz i
 
 def generate_live_trades_table():
     data = query_data('live_trades')
-    data['createdAt'] = (data['createdAt']/1000).map(
+    data['Buy Time'] = (data['Buy Time']/1000).map(
         lambda x: datetime.utcfromtimestamp(x).strftime('%m/%d/%Y %H:%M:%S')
     )
 

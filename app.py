@@ -59,7 +59,7 @@ dash.layout = html.Div([
                      children=generate_trading_on_table())
         ], width={'size': 4, 'offset': 2}),
         dbc.Col([
-            html.H2('Current Pool'),
+            html.H2('Budget (USDT)'),
             html.Div(
                 id='pool_data',
                 children=generate_pool_data())
@@ -78,7 +78,7 @@ dash.layout = html.Div([
             )
         ], width={'size': 4, 'offset': 2}),
         dbc.Col([
-            html.H2('Last 20 Trades'),
+            html.H2('Last 20 Trade Pairs'),
             html.Div(id='last-20-trades',
                      children=generate_last_trades_table()),
         ], width={'size': 4})
