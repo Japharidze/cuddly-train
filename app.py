@@ -1,9 +1,11 @@
+import os
+import time
 from datetime import date, timedelta
 from datetime import datetime
 
 import dash
+import dash_auth
 from numpy import array
-from pandas import melt
 from dash import html
 from dash import dcc
 from dash.dependencies import Input, Output, State
@@ -19,12 +21,23 @@ from body_components import (generate_live_trades_table, generate_pool_data,
                             generate_trading_on_table, generate_last_trades_table)
 
 
+# needed configs
+os.environ['TZ'] = 'UTC'
+time.tzset()
+VALID_USERNAME_PASSWORD_PAIRS = {
+    "igishi": "igiiyo"
+}
+
 trades = query_trade_data()
 coins = query_coins()['binance_name']
 
 dash = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO],
                 meta_tags=[{'name': 'viewport',
                             'content': 'width=device-width, initial-scale=1.0'}])
+auth = dash_auth.BasicAuth(
+    dash,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 server = dash.server
 
 dash.layout = html.Div([
@@ -48,7 +61,8 @@ dash.layout = html.Div([
             dcc.Tabs(id='interval-tabs', value='today', children=[
                 dcc.Tab(label='Today', value='today'),
                 dcc.Tab(label='This Week', value='week'),
-                dcc.Tab(label='This Month', value='month')
+                dcc.Tab(label='This Month', value='month'),
+                dcc.Tab(label='This Year', value='year')
             ])
         ], width={'size': 8, 'offset': 2})
     ]),
@@ -307,7 +321,7 @@ def update_pool_div(interval):
 # start Flask server
 if __name__ == '__main__':
     dash.run_server(
-        debug=True,
+        debug=False,
         host='0.0.0.0',
         port=8050
     )

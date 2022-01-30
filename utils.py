@@ -18,14 +18,16 @@ def candle_interval_generator(start_date, end_date):
 def get_db_timestamp(interval: str):
     """Generates formatted-timestamp for db queries based on an interval"""
     if interval == 'today':
-        dt = datetime.combine(date.today(), datetime.min.time())
-    if interval == 'week':
+        dt = date.today()
+    elif interval == 'week':
         dt = date.today()
         dt = dt - timedelta(days=dt.weekday())
-        dt = datetime.combine(dt, datetime.min.time())
-    if interval == 'month':
+    elif interval == 'month':
         dt = date.today().replace(day=1)
-        dt = datetime.combine(dt, datetime.min.time())
+    else:
+        dt = date.today().replace(day=1, month=1)
+    
+    dt = datetime.combine(dt, datetime.min.time())
     tmstmp = dt.timestamp() * 1000
 
     return tmstmp
