@@ -30,7 +30,7 @@ H2 {
 }
 
 #pool_data > div {
-    height: 85px;
+    height: 65px;
     padding: 1px;
 }
 
@@ -38,12 +38,12 @@ H2 {
     text-align: left;
     color: black;
     font-weight: bold;
-    font-size: x-large;
 }
 
 #pool_data > div > .pool_size{
     text-align: center;
     font-weight: normal;
+    font-size: larger;
 }
 
 #pool_up {
