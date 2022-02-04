@@ -3,6 +3,9 @@ import time
 from datetime import date, timedelta
 from datetime import datetime
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import dash
 import dash_auth
 from numpy import array

@@ -4,7 +4,7 @@ from datetime import datetime
 from dash import html
 from dash.dash_table import DataTable
 
-from data import query_data
+from data import query_data, fetch_balance
 from utils import get_db_timestamp
 from config import colors
 
@@ -102,7 +102,7 @@ def generate_last_trades_table():
 
 def generate_pool_data(interval='today'):
     prefix = 'pool_'
-    pools = ['up', 'down', 'profit']
+    pools = ['up', 'down', 'profit', 'pool']
     pool_data = dict()
     children = []
 
@@ -114,6 +114,7 @@ def generate_pool_data(interval='today'):
     pool_data['up'] = data[data['sign'] == 1]['amt'].sum()
     pool_data['down'] = data[data['sign'] == -1]['amt'].sum()
     pool_data['profit'] = (data['amt'] * data['sign']).sum()
+    pool_data['pool'] = fetch_balance()
 
     # generate children result
     for pool in pools:

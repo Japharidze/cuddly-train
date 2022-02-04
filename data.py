@@ -5,10 +5,11 @@ from threading import Thread
 from psycopg2 import connect
 from pandas import read_sql, DataFrame
 
-from config import LambdaConfig, DBConfig
+from config import LambdaConfig, RestConfig, DBConfig
 
 conn = connect(DBConfig.URL)
-rest = LambdaConfig.URL
+lambda_url = LambdaConfig.URL
+rest = RestConfig.URL
 
 g_event = {'symbol': 'SHIBUSDT',
          'interval': '1m', 
@@ -19,9 +20,9 @@ g_event = {'symbol': 'SHIBUSDT',
 def fetch_data_test(**kwargs):
     event = dict(**kwargs)
     if bool(event):
-        response = requests.get(rest, params=event)
+        response = requests.get(lambda_url, params=event)
     else:
-        response = requests.get(rest, params=g_event)
+        response = requests.get(lambda_url, params=g_event)
     return response.json().get('klines')
 
 def fetch_binance_data(data: DataFrame, interval='1m'):
@@ -35,8 +36,7 @@ def fetch_binance_data(data: DataFrame, interval='1m'):
     def fetch(row):
         params = dict(row)
         params['interval'] = interval
-        response = requests.get(rest, params=params)
-        print(params)
+        response = requests.get(lambda_url, params=params)
         klines = response.json().get('klines')
         if klines:
             res.append((row, DataFrame(klines[1:], columns=klines[0])))
@@ -94,3 +94,15 @@ def query_data(sql_file: str, **kwargs):
 
     dt = read_sql(query, conn)
     return dt
+
+def fetch_balance():
+    """DOCSTRING"""
+
+    # generate url
+    url = f'{rest}get_balance'
+    try:
+        response = requests.get(url)
+    except:
+        raise Exception(f'RestError while requesting get_balance from {url}')
+
+    return response.text

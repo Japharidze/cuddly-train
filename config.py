@@ -7,6 +7,9 @@ class DBConfig:
 class LambdaConfig:
     URL = os.environ.get('LAMBDA_URL')
 
+class RestConfig:
+    URL = os.environ.get('REST_URL')
+
 class Colors:
     CANDLE_RED = '#ef5350'
     CANDLE_GREEN = '#26a69a'
