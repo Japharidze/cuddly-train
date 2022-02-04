@@ -1,7 +1,7 @@
 select
     t.symbol "Coin",
-    t."dealSize" "Deal Size",
-    t."dealFunds"::DECIMAL / t."dealSize"::DECIMAL as "Price",
+    t."dealSize"::DECIMAL(10,6) "Deal Size",
+    (t."dealFunds"::DECIMAL / t."dealSize"::DECIMAL)::DECIMAL(10,6) as "Price",
     t."createdAt" "Buy Time"
 from coins c
     join trades t 

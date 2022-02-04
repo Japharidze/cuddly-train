@@ -24,7 +24,7 @@ from body_components import (generate_live_trades_table, generate_pool_data,
 
 
 # needed configs
-os.environ['TZ'] = 'GMT+5'
+os.environ['TZ'] = 'UTC'
 time.tzset()
 
 # dash auth credentials
@@ -35,7 +35,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 }
 
 trades = query_trade_data()
-coins = query_coins()['binance_name']
+coins = query_coins()
 
 dash = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO],
                 meta_tags=[{'name': 'viewport',
@@ -113,7 +113,7 @@ dash.layout = html.Div([
         dbc.Col([
             html.Label('Coins'),
             dcc.Dropdown(id='name_dpdn', multi=True, # value='all_values',
-                options=[{'label':x, 'value':x} for x in coins] +\
+                options=[{'label':x.kucoin_name, 'value':x.binance_name} for _, x in coins.iterrows()] +\
                         [{'label':'All', 'value':'all_values'}]
                 )], width={'size': 8, 'offset': 2})
         ]),
@@ -179,8 +179,8 @@ def update_container(container, symbols, start_date, end_date, interval, min_per
         return container
     container = []
 
-    start_time = datetime.strptime(start_date or '2021-12-14', '%Y-%m-%d').timestamp()
-    end_time = datetime.strptime(end_date or '2021-12-14', '%Y-%m-%d').timestamp()
+    start_time = datetime.strptime(start_date, '%Y-%m-%d').timestamp()
+    end_time = (timedelta(1) + datetime.strptime(end_date, '%Y-%m-%d')).timestamp()
 
     params = {'profit': (min_percent, max_percent),
               'period': (start_time, end_time)}

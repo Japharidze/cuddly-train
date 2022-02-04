@@ -13,7 +13,7 @@ def generate_trading_on_table(interval='today'):
     tmstmp = get_db_timestamp(interval)
     tab_data = query_data('trading_on', timestamp=tmstmp)
     tab_data['sum_profit'] = tab_data['sum_profit'].map(
-        lambda x: '{:.2f} %'.format(x)
+        lambda x: '{:.2f}'.format(x)
     )
     tab_data.columns = ['Coin', 'Count', 'Profit']
 
@@ -31,22 +31,18 @@ def generate_trading_on_table(interval='today'):
         # style_data={'backgroundColor': 'gray'},
         style_data_conditional=[
             {
-                'if': {'column_id': 'Profit'},
-                'color': colors.CANDLE_GREEN,
-            },
-            {
                 'if': {
-                    'filter_query': '{Profit} contains "-"',
+                    'filter_query': '{Profit} < 0',
                     'column_id': 'Profit'
                 },
                 'color': colors.CANDLE_RED,
             },
             {
                 'if': {
-                    'filter_query': '{Profit} = "nan %"',
+                    'filter_query': '{Profit} > 0',
                     'column_id': 'Profit'
                 },
-                'color': 'black',
+                'color': colors.CANDLE_GREEN,
             },
             {
                 'if': {
@@ -66,7 +62,7 @@ table = generate_trading_on_table() # This needs to be changed, moved only cuz i
 def generate_live_trades_table():
     data = query_data('live_trades')
     data['Buy Time'] = (data['Buy Time']/1000).map(
-        lambda x: datetime.utcfromtimestamp(x).strftime('%m/%d/%Y %H:%M:%S')
+        lambda x: datetime.utcfromtimestamp(x).strftime('%H:%M:%S %m/%d/%y')
     )
 
     live_table = DataTable(
@@ -83,9 +79,6 @@ def generate_live_trades_table():
 
 def generate_last_trades_table():
     data = query_data('last_trades')
-    data['Profit'] = data['Profit'].map(
-        lambda x: '{:.2f} %'.format(x)
-    )
 
     res = DataTable(
         columns = [{'name': i, 'id': i} for i in data.columns],
@@ -113,7 +106,7 @@ def generate_pool_data(interval='today'):
     data = query_data('get_pool_data', timestamp=tmstmp)
     pool_data['up'] = data[data['sign'] == 1]['amt'].sum()
     pool_data['down'] = data[data['sign'] == -1]['amt'].sum()
-    pool_data['profit'] = (data['amt'] * data['sign']).sum()
+    pool_data['profit'] = (data['amt']).sum()
     pool_data['pool'] = fetch_balance()
 
     # generate children result

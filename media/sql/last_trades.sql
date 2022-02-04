@@ -1,8 +1,8 @@
 select
-    c.binance_name "Coin",
-    (bt."dealFunds"::DECIMAL / bt."dealSize"::DECIMAL)::DECIMAL(10,8) as "Buy price",
-    (st."dealFunds"::DECIMAL / st."dealSize"::DECIMAL)::DECIMAL(10,8) as "Sell price",
-    tp.profit as "Profit"
+    c.kucoin_name "Coin",
+    (bt."dealFunds"::DECIMAL / bt."dealSize"::DECIMAL)::DECIMAL(10,6) as "Buy price",
+    (st."dealFunds"::DECIMAL / st."dealSize"::DECIMAL)::DECIMAL(10,6) as "Sell price",
+    ((st."dealFunds"::DECIMAL - st.FEE::DECIMAL) - (bt."dealFunds"::DECIMAL - bt.FEE::DECIMAL))::DECIMAL(4, 2) as "Profit"
 from trade_pairs tp 
     join trades bt on tp.buy_id = bt.id
     join trades st on tp.sell_id = st.id
