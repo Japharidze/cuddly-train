@@ -5,10 +5,10 @@ from threading import Thread
 from psycopg2 import connect
 from pandas import read_sql, DataFrame
 
-from config import db_config
+from config import LambdaConfig, DBConfig
 
-conn = connect(db_config.URL)
-rest = 'https://3xw7x7ql7f.execute-api.ap-northeast-2.amazonaws.com/stg/dep'
+conn = connect(DBConfig.URL)
+rest = LambdaConfig.URL
 
 g_event = {'symbol': 'SHIBUSDT',
          'interval': '1m', 

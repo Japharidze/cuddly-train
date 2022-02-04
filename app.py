@@ -11,7 +11,6 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import plotly.express as px
 from plotly.subplots import make_subplots
 
 from data import fetch_binance_data, query_trade_data, query_coins
@@ -22,10 +21,14 @@ from body_components import (generate_live_trades_table, generate_pool_data,
 
 
 # needed configs
-os.environ['TZ'] = 'UTC'
+os.environ['TZ'] = 'GMT+5'
 time.tzset()
+
+# dash auth credentials
+user = os.environ.get('DASH_AUTH_USER')
+password = os.environ.get('DASH_AUTH_PASS')
 VALID_USERNAME_PASSWORD_PAIRS = {
-    "igishi": "igiiyo"
+    user : password
 }
 
 trades = query_trade_data()

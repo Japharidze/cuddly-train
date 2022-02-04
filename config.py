@@ -4,6 +4,9 @@ class DBConfig:
     URL = os.environ.get('DATABASE_URL')
     # URL = 'postgresql://postgres:admin@localhost:5432/kucoin'
 
+class LambdaConfig:
+    URL = os.environ.get('LAMBDA_URL')
+
 class Colors:
     CANDLE_RED = '#ef5350'
     CANDLE_GREEN = '#26a69a'
