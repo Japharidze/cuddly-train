@@ -102,7 +102,7 @@ def generate_last_trades_table():
 
 def generate_pool_data(interval='today'):
     prefix = 'pool_'
-    pools = ['up', 'down', 'pool']
+    pools = ['up', 'down', 'profit']
     pool_data = dict()
     children = []
 
@@ -113,7 +113,7 @@ def generate_pool_data(interval='today'):
     data = query_data('get_pool_data', timestamp=tmstmp)
     pool_data['up'] = data[data['sign'] == 1]['amt'].sum()
     pool_data['down'] = data[data['sign'] == -1]['amt'].sum()
-    pool_data['pool'] = (data['amt'] * data['sign']).sum()
+    pool_data['profit'] = (data['amt'] * data['sign']).sum()
 
     # generate children result
     for pool in pools:
